@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="74ed0619-557d-408c-9673-430486506f53" name="Hetzner" url="http://impfservice.s1810456032.student.kwmhgb.at">
+        <fileTransfer rootFolder="/usr/home/sstud793/public_html/impfservice/impfserviceServer" accessType="SFTP" host="dedi50.your-server.de" port="222" sshConfigId="494e8656-90c2-405a-ac95-7560ce42cb89" sshConfig="sstud793@dedi50.your-server.de:222 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
