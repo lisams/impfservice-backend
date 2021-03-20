@@ -20,7 +20,7 @@ class User extends Authenticatable {
     protected $fillable = [
         'sv_nr', 'date_of_birth', 'firstname', 'lastname',
         'gender', 'email', 'phone', 'password', 'vaccinated',
-        'address_id', 'is_admin'
+        'address_id', 'is_admin', 'vaccination_id'
     ];
 
     /**
@@ -46,5 +46,12 @@ class User extends Authenticatable {
      */
     public function address() : BelongsTo {
         return $this->belongsTo(Address::class);
+    }
+
+    /**
+     * user belongs to one vaccination
+     */
+    public function vaccination() : BelongsTo {
+        return $this->belongsTo(Vaccination::class);
     }
 }
