@@ -24,10 +24,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // vaccinations
 Route::get('vaccinations', [VaccinationController::class, 'index']);
 Route::get('vaccination/{id}', [VaccinationController::class, 'findByID']);
+Route::get('vaccination/openslots/{id}', [VaccinationController::class, 'getOpenSlots']);
 
 // users
 Route::get('users', [UserController::class, 'index']);
 Route::get('user/{svnr}', [UserController::class, 'findBySVNR']);
+Route::get('user/checkvaccination/{svnr}', [UserController::class, 'checkIfVaccinated']);
 
 // locations
 Route::get('locations', [LocationController::class, 'index']);
