@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Address;
 use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,8 +13,7 @@ class LocationController extends Controller
     }
 
     public function findByZIP(string $zip) {
-        $locations = DB::table('locations')
-            ->join('addresses', 'locations.address_id', '=', 'addresses.id')
+        $locations = Location::with([])->join('addresses', 'locations.address_id', '=', 'addresses.id')
             ->where('addresses.zip_code', '=', $zip)->get();
         return $locations->count() > 0 ? $locations : response()->json("no locations in this city available", 200);
 

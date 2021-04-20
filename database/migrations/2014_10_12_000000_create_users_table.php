@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('gender');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('phone');
+            $table->string('phone')->nullable();
             $table->string('password');
             $table->boolean('vaccinated')->default(false);
 
