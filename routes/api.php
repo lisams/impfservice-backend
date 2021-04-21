@@ -25,6 +25,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('vaccinations', [VaccinationController::class, 'index']);
 Route::get('vaccination/{id}', [VaccinationController::class, 'findByID']);
 Route::get('vaccination/openslots/{id}', [VaccinationController::class, 'getOpenSlots']);
+Route::post('vaccination/', [VaccinationController::class, 'create']);
+Route::put('vaccination/{id}', [VaccinationController::class, 'update']);
 Route::delete('vaccination/{id}', [VaccinationController::class, 'remove']);
 
 // users
