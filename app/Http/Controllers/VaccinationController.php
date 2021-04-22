@@ -18,6 +18,34 @@ class VaccinationController extends Controller
         return Vaccination::with(['location', 'users'])->orderBy('date', 'ASC')->get();
     }
 
+    public function getUpcomingVaccinations()
+    {
+        return Vaccination::with(['location', 'users'])->orderBy('date', 'ASC')->where('date', '>', DB::raw('NOW()'))->get();
+    }
+
+    public function getUpcomingVaccinationsOpenSlots()
+    {
+        $vaccs = Vaccination::with(['location', 'users'])
+            ->orderBy('date', 'ASC')
+            ->where('date', '>', DB::raw('NOW()'))
+            ->get();
+
+        // var_dump($vaccs->count());
+
+        $vaccs1 = [];
+
+        foreach ($vaccs as $vacc) {
+            if($vacc->users->count() < $vacc->max_participants) {
+                // var_dump($vacc->users->count());
+                $vaccs1[] = $vacc;
+            } else {
+                // var_dump($vacc);
+            }
+        }
+
+        return $vaccs1;
+    }
+
     public function findByID(string $id): Vaccination
     {
         $vacc = Vaccination::where('id', $id)
@@ -108,11 +136,37 @@ class VaccinationController extends Controller
 
     }
 
-    public function update(Request $request, string $id): JsonResponse {
+    public function update(Request $request, string $id): JsonResponse
+    {
         DB::beginTransaction();
         try {
 
-            // TODO UPDATE BOOK
+            // update vaccination values
+            $vacc = Vaccination::with(['location', 'users'])
+                ->where('id', $id)->first();
+            $vacc->update([
+                    'date' => $request['date'],
+                    'start' => $request['start'],
+                    'end' => $request['end'],
+                    'max_participants' => $request['max_participants'],
+                    'location_id' => $vacc->location_id
+                ]
+            );
+            $vacc->save();
+
+            // update location infos
+            $location = Location::where('id', $vacc->location_id)->first();
+            $location->update([
+                'title' => $request['location']['title'],
+                'description' => $request['location']['description'] ? $request['location']['description'] : null,
+                'address_id' => $location->address_id
+            ]);
+            $location->save();
+
+            // update address
+            $address = Address::where('id', $location->address_id)->first();
+            $address->update($request['location']['address']);
+            $address->save();
 
             DB::commit();
             $vacc1 = Vaccination::with(['location', 'users'])
