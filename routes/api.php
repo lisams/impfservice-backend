@@ -26,15 +26,17 @@ Route::get('vaccinations', [VaccinationController::class, 'index']);
 Route::get('vaccinations/upcoming', [VaccinationController::class, 'getUpcomingVaccinations']);
 Route::get('vaccinations/openslots', [VaccinationController::class, 'getUpcomingVaccinationsOpenSlots']);
 Route::get('vaccination/{id}', [VaccinationController::class, 'findByID']);
-Route::get('vaccination/openslots/{id}', [VaccinationController::class, 'getOpenSlots']);
-Route::post('vaccination/', [VaccinationController::class, 'create']);
+// Route::get('vaccination/openslots/{id}', [VaccinationController::class, 'getOpenSlots']);
+Route::post('vaccination', [VaccinationController::class, 'create']);
 Route::put('vaccination/{id}', [VaccinationController::class, 'update']);
 Route::delete('vaccination/{id}', [VaccinationController::class, 'remove']);
 
 // users
 Route::get('users', [UserController::class, 'index']);
 Route::get('user/{svnr}', [UserController::class, 'findBySVNR']);
-Route::get('user/checkvaccination/{svnr}', [UserController::class, 'checkIfVaccinated']);
+// Route::get('user/checkvaccination/{svnr}', [UserController::class, 'checkIfVaccinated']);
+Route::put('user/{svnr}', [UserController::class, 'update']);
+Route::delete('user/{svnr}', [UserController::class, 'remove']);
 
 // locations
 Route::get('locations', [LocationController::class, 'index']);
