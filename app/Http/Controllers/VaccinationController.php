@@ -6,72 +6,48 @@ use App\Models\Address;
 use App\Models\User;
 use App\Models\Vaccination;
 use App\Models\Location;
-use http\Client\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class VaccinationController extends Controller
 {
-    public function index()
-    {
+    /** READ all vaccination */
+    public function index() {
         return Vaccination::with(['location', 'users'])->orderBy('date', 'ASC')->get();
     }
 
-    public function getUpcomingVaccinations()
-    {
+    /** READ all upcoming vaccinations */
+    public function getUpcomingVaccinations() {
         return Vaccination::with(['location', 'users'])->orderBy('date', 'ASC')->where('date', '>', DB::raw('NOW()'))->get();
     }
 
-    public function getUpcomingVaccinationsOpenSlots()
-    {
+    /** READ all upcoming vaccination with open slots */
+    public function getUpcomingVaccinationsOpenSlots() {
         $vaccs = Vaccination::with(['location', 'users'])
             ->orderBy('date', 'ASC')
             ->where('date', '>', DB::raw('NOW()'))
             ->get();
-
-        // var_dump($vaccs->count());
-
         $vaccs1 = [];
 
         foreach ($vaccs as $vacc) {
             if($vacc->users->count() < $vacc->max_participants) {
-                // var_dump($vacc->users->count());
                 $vaccs1[] = $vacc;
-            } else {
-                // var_dump($vacc);
             }
         }
-
         return $vaccs1;
     }
 
-    public function findByID(string $id): Vaccination
-    {
+    /** READ single vaccination by id */
+    public function findVaccinationById(string $id): Vaccination {
         $vacc = Vaccination::where('id', $id)
             ->with(['location', 'users'])
             ->first();
         return $vacc;
     }
 
-    public function getOpenSlots(string $id)
-    {
-        $maxParticipants = Vaccination::where('id', $id)
-            ->with(['users'])->first()->max_participants;
-        $participants = DB::table('vaccinations')
-            ->join('users', 'users.vaccination_id', '=', 'vaccinations.id')
-            ->where('vaccinations.id', $id)
-            ->count();
-        return response($maxParticipants - $participants, 200);
-
-        // SELECT COUNT(*)
-        // FROM vaccinations
-        // INNER JOIN users ON vaccinations.id = users.vaccination_id
-        // WHERE (vaccinations.id=xy)
-    }
-
-    public function remove(string $id): JsonResponse
-    {
+    /** DELETE single vaccination by id */
+    public function removeVaccinationById(string $id): JsonResponse {
         $vacc = Vaccination::where('id', $id)
             ->with(['location'])
             ->first();
@@ -93,12 +69,9 @@ class VaccinationController extends Controller
         return response()->json('vaccination (' . $id . ') successfully deleted');
     }
 
-    public function create(Request $request): JsonResponse
-    {
+    /** CREATE new vaccination */
+    public function createVaccination(Request $request): JsonResponse {
         $request = $this->parseRequest($request);
-
-        // var_dump($request['location']['address']['city']);
-        //die();
 
         DB::beginTransaction();
         try {
@@ -115,7 +88,7 @@ class VaccinationController extends Controller
             );
 
             // save vaccination
-            // TODO create OR firstOrCreate --> soll mehrmals eine Impfung angelegt werden können?
+            // create STATT firstOrCreate, weil es soll mehrmals eine Impfung angelegt werden können
             $vaccination = Vaccination::create([
                 'date' => $request['date'],
                 'start' => $request['start'],
@@ -127,17 +100,18 @@ class VaccinationController extends Controller
 
             // DB commit
             DB::commit();
-            return response()->json($vaccination, 201);
+            $vacc1 = Vaccination::with(['location', 'users'])
+                ->where('id', $vaccination->id)->first();
+            return response()->json($vacc1, 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json("saving vaccination failed: " . $e->getMessage(), 420);
         }
-
     }
 
-    public function update(Request $request, string $id): JsonResponse
-    {
+    /** UPDATE single vaccination by id */
+    public function updateVaccinationById(Request $request, string $id): JsonResponse {
         DB::beginTransaction();
         try {
 
@@ -165,8 +139,13 @@ class VaccinationController extends Controller
 
             // update address
             $address = Address::where('id', $location->address_id)->first();
-            $address->update($request['location']['address']);
-            $address->save();
+            $address->update([
+                    'street_address' => $request['location']['address']['street_address'],
+                    'zip_code' => $request['location']['address']['zip_code'],
+                    'city' => $request['location']['address']['city']
+                ]
+            );
+             $address->save();
 
             DB::commit();
             $vacc1 = Vaccination::with(['location', 'users'])
@@ -179,11 +158,8 @@ class VaccinationController extends Controller
         }
     }
 
-    /**
-     * modify / convert values if needed
-     */
-    private
-    function parseRequest(Request $request): Request
+    /** modify / convert values if needed */
+    private function parseRequest(Request $request): Request
     {
         // get date and convert it - its in ISO 8601, e.g. "2018-01-01T23:00:00.000Z"
         $date = new \DateTime($request->date);

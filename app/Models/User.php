@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable {
+class User extends Authenticatable implements JWTSubject{
     use HasFactory, Notifiable;
 
     /**
@@ -53,5 +54,13 @@ class User extends Authenticatable {
      */
     public function vaccination() : BelongsTo {
         return $this->belongsTo(Vaccination::class);
+    }
+
+    public function getJWTIdentifier() {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims() {
+        return ['user' => ['id' => $this->id, 'svnr' => $this->sv_nr, 'admin' => $this->is_admin]];
     }
 }
