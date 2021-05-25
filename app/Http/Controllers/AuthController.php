@@ -12,15 +12,11 @@ class AuthController extends Controller
 
     public function login() {
         $credentials = request(['email', 'password']);
-
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
         return $this->respondWithToken($token);
-
     }
-
 
     public function logout() {
         auth()->logout();
@@ -30,7 +26,6 @@ class AuthController extends Controller
     public function refresh() {
         return $this->respondWithToken(auth()->refresh());
     }
-
 
     protected function respondWithToken(string $token) {
         return response()->json([

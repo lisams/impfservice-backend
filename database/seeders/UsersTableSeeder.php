@@ -49,6 +49,7 @@ class UsersTableSeeder extends Seeder
         $user->phone = '+43 667 143 98 74';
         $user->password = bcrypt('test1234!');
         $user->address_id = 3;
+        $user->is_admin = true;
         $user->vaccination_id = 4;
         $user->save();
 

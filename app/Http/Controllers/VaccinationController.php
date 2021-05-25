@@ -118,6 +118,7 @@ class VaccinationController extends Controller
             // update vaccination values
             $vacc = Vaccination::with(['location', 'users'])
                 ->where('id', $id)->first();
+
             $vacc->update([
                     'date' => $request['date'],
                     'start' => $request['start'],
